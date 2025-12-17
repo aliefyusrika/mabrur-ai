@@ -1,0 +1,193 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String?  @unique
+  password  String?
+  name      String
+  role      String   @default("JAMAAH")
+  token     String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  jamaah    Jamaah?
+}
+
+model Jamaah {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phone       String?
+  passportNo  String?
+  packageType String?
+  departureDate DateTime?
+  status      JamaahStatus?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model JamaahStatus {
+  id              String   @id @default(cuid())
+  jamaahId        String   @unique
+  jamaah          Jamaah   @relation(fields: [jamaahId], references: [id], onDelete: Cascade)
+  payment         String   @default("NOT_STARTED")
+  visa            String   @default("NOT_STARTED")
+  ticket          String   @default("NOT_STARTED")
+  hotel           String   @default("NOT_STARTED")
+  transport       String   @default("NOT_STARTED")
+  equipment       String   @default("NOT_STARTED")
+  manasik         String   @default("NOT_STARTED")
+  updatedAt       DateTime @updatedAt
+}
+
+model ChatbotContent {
+  id        String   @id @default(cuid())
+  type      String
+  question  String
+  answer    String
+  keywords  String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ManasikContent {
+  id          String   @id @default(cuid())
+  type        String   // VIDEO, DOA, STEP
+  title       String
+  content     String   @db.Text
+  videoUrl    String?
+  orderIndex  Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Departure {
+  id              String   @id @default(cuid())
+  flightNumber    String
+  airline         String
+  departureDate   DateTime
+  departureTime   String
+  arrivalTime     String?
+  origin          String
+  destination     String
+  terminal        String?
+  gate            String?
+  status          String   @default("ON_TIME") // ON_TIME, DELAYED, BOARDING, DEPARTED, CANCELLED
+  delayMinutes    Int?
+  notes           String?  @db.Text
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  type        String   // DEPARTURE, GENERAL, REMINDER
+  title       String
+  message     String   @db.Text
+  priority    String   @default("NORMAL") // LOW, NORMAL, HIGH, URGENT
+  isActive    Boolean  @default(true)
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model IbadahContent {
+  id          String   @id @default(cuid())
+  category    String   // TAWAF, SAII, WUKUF, MABIT, JUMRAH, DOA_HARIAN
+  location    String   // MASJIDIL_HARAM, MASJID_NABAWI, ARAFAH, MINA, MUZDALIFAH
+  title       String
+  arabicText  String?  @db.Text
+  latinText   String?  @db.Text
+  translation String?  @db.Text
+  audioPath   String?  // Local uploaded audio path
+  description String?  @db.Text
+  orderIndex  Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ZiarahLocation {
+  id          String   @id @default(cuid())
+  city        String   // MAKKAH, MADINAH
+  name        String
+  arabicName  String?
+  description String   @db.Text
+  history     String?  @db.Text
+  virtues     String?  @db.Text  // Keutamaan
+  practices   String?  @db.Text  // Amalan yang dianjurkan
+  imagePath   String?  // Local uploaded image path
+  latitude    Decimal? @db.Decimal(10, 8)
+  longitude   Decimal? @db.Decimal(11, 8)
+  placeId     String?  // Google Maps place_id
+  address     String?  @db.Text // Formatted address from Google
+  orderIndex  Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ReturnFlight {
+  id              String   @id @default(cuid())
+  flightNumber    String
+  airline         String
+  returnDate      DateTime
+  departureTime   String
+  arrivalTime     String?
+  origin          String   @default("JED - Jeddah")
+  destination     String   @default("CGK - Jakarta")
+  terminal        String?
+  gate            String?
+  status          String   @default("ON_TIME") // ON_TIME, DELAYED, BOARDING, DEPARTED, CANCELLED
+  delayMinutes    Int?
+  notes           String?  @db.Text
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model JourneyMemory {
+  id          String   @id @default(cuid())
+  jamaahId    String
+  title       String
+  content     String   @db.Text
+  imageUrl    String?
+  location    String?
+  memoryDate  DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Testimonial {
+  id          String   @id @default(cuid())
+  jamaahId    String
+  jamaahName  String
+  rating      Int      @default(5)
+  content     String   @db.Text
+  packageType String?
+  travelDate  String?
+  isApproved  Boolean  @default(false)
+  isPublic    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model LoyaltyPoints {
+  id          String   @id @default(cuid())
+  jamaahId    String   @unique
+  points      Int      @default(0)
+  tier        String   @default("BRONZE") // BRONZE, SILVER, GOLD, PLATINUM
+  referralCode String  @unique
+  totalReferrals Int   @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
