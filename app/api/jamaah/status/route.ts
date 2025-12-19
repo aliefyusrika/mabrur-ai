@@ -1,50 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
+import { PrismaClient } from '@prisma/client'
 
-export async function GET(req: NextRequest) {
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+
+export async function GET(request: NextRequest) {
   try {
-    const token = req.headers.get('x-jamaah-token')
+    const token = request.nextUrl.searchParams.get('token')
 
     if (!token) {
-      return NextResponse.json({ error: 'Token required' }, { status: 401 })
+      return NextResponse.json(
+        { error: 'Token required' },
+        { status: 400 }
+      )
     }
+
+    const prisma = new PrismaClient()
 
     const user = await prisma.user.findUnique({
       where: { token },
       include: {
         jamaah: {
-          include: { status: true }
+          include: {
+            status: true
+          }
         }
       }
     })
 
-    if (!user || user.role !== 'JAMAAH' || !user.jamaah) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
-    }
+    await prisma.$disconnect()
 
-    const status = user.jamaah.status || {
-      payment: 'NOT_STARTED',
-      visa: 'NOT_STARTED',
-      ticket: 'NOT_STARTED',
-      hotel: 'NOT_STARTED',
-      transport: 'NOT_STARTED',
-      equipment: 'NOT_STARTED',
-      manasik: 'NOT_STARTED',
+    if (!user) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      )
     }
 
     return NextResponse.json({
-      name: user.name,
-      status: {
-        payment: status.payment,
-        visa: status.visa,
-        ticket: status.ticket,
-        hotel: status.hotel,
-        transport: status.transport,
-        equipment: status.equipment,
-        manasik: status.manasik,
-      }
+      status: user.jamaah?.status
     })
-  } catch {
-    return NextResponse.json({ error: 'Server error' }, { status: 500 })
+  } catch (error) {
+    console.error('Status error:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
   }
 }
