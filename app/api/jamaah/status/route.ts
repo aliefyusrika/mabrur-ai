@@ -4,6 +4,9 @@ import { PrismaClient } from '@prisma/client'
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
+// Reuse Prisma Client instance
+const prisma = new PrismaClient()
+
 export async function GET(request: NextRequest) {
   try {
     const token = request.nextUrl.searchParams.get('token')
@@ -14,8 +17,6 @@ export async function GET(request: NextRequest) {
         { status: 400 }
       )
     }
-
-    const prisma = new PrismaClient()
 
     const user = await prisma.user.findUnique({
       where: { token },
@@ -28,8 +29,6 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    await prisma.$disconnect()
-
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },
@@ -40,10 +39,10 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       status: user.jamaah?.status
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Status error:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: error.message },
       { status: 500 }
     )
   }

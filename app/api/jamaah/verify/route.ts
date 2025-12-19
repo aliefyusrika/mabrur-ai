@@ -4,6 +4,9 @@ import { PrismaClient } from '@prisma/client'
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
+// Reuse Prisma Client instance
+const prisma = new PrismaClient()
+
 export async function POST(request: NextRequest) {
   try {
     const { token } = await request.json()
@@ -15,8 +18,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const prisma = new PrismaClient()
-
     const user = await prisma.user.findUnique({
       where: { token },
       include: {
@@ -27,8 +28,6 @@ export async function POST(request: NextRequest) {
         }
       }
     })
-
-    await prisma.$disconnect()
 
     if (!user || user.role !== 'JAMAAH') {
       return NextResponse.json(
@@ -46,10 +45,10 @@ export async function POST(request: NextRequest) {
       jamaah: user.jamaah,
       status: user.jamaah?.status
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Verify error:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: error.message },
       { status: 500 }
     )
   }
