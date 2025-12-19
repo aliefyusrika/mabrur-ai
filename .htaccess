@@ -1,0 +1,11 @@
+# Redirect all requests to Node.js app
+RewriteEngine On
+
+# Don't rewrite files or directories
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Proxy to Node.js app
+# Replace PORT with your actual port from cPanel Node.js App (usually shown in the app settings)
+RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
