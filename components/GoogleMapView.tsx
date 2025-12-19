@@ -70,7 +70,7 @@ export default function GoogleMapView({ latitude, longitude, name }: GoogleMapVi
 
     const position = { lat: latitude, lng: longitude }
 
-    const map = new google.maps.Map(mapRef.current, {
+    const map = new window.google.maps.Map(mapRef.current, {
       center: position,
       zoom: 16,
       mapTypeControl: false,
@@ -79,7 +79,7 @@ export default function GoogleMapView({ latitude, longitude, name }: GoogleMapVi
       zoomControl: true
     })
 
-    new google.maps.Marker({
+    new window.google.maps.Marker({
       position,
       map,
       title: name
@@ -123,3 +123,4 @@ export default function GoogleMapView({ latitude, longitude, name }: GoogleMapVi
     </div>
   )
 }
+

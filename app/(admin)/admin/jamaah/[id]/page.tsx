@@ -4,6 +4,11 @@ import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { AdminLayout, AdminCard, StatusBadge } from '@/components/admin'
 
+// For static export - return empty array to skip pre-rendering
+export function generateStaticParams() {
+  return []
+}
+
 interface JamaahDetail {
   id: string
   user: { name: string; token: string }

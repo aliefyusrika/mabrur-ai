@@ -6,6 +6,9 @@ const nextConfig = {
     unoptimized: true,
   },
   trailingSlash: true,
+  // Skip dynamic routes for static export
+  // These will be handled client-side
+  skipTrailingSlashRedirect: true,
   // Disable API routes for static export
   // All API calls will go to PHP backend
 }

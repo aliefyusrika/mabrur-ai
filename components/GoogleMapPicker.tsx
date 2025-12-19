@@ -22,7 +22,7 @@ const cityDefaults = {
 
 declare global {
   interface Window {
-    google: typeof google
+    google: any
     initGoogleMaps: () => void
   }
 }
@@ -30,8 +30,8 @@ declare global {
 export default function GoogleMapPicker({ latitude, longitude, onLocationSelect, city = 'MAKKAH' }: GoogleMapPickerProps) {
   const mapRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLInputElement>(null)
-  const [map, setMap] = useState<google.maps.Map | null>(null)
-  const [marker, setMarker] = useState<google.maps.Marker | null>(null)
+  const [map, setMap] = useState<any>(null)
+  const [marker, setMarker] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -40,17 +40,17 @@ export default function GoogleMapPicker({ latitude, longitude, onLocationSelect,
     ? { lat: latitude, lng: longitude }
     : defaultCenter
 
-  const updateMarker = useCallback((position: google.maps.LatLng, map: google.maps.Map, existingMarker: google.maps.Marker | null) => {
+  const updateMarker = useCallback((position: any, map: any, existingMarker: any) => {
     if (existingMarker) {
       existingMarker.setPosition(position)
       return existingMarker
     }
     
-    const newMarker = new google.maps.Marker({
+    const newMarker = new window.google.maps.Marker({
       position,
       map,
       draggable: true,
-      animation: google.maps.Animation.DROP
+      animation: window.google.maps.Animation.DROP
     })
 
     newMarker.addListener('dragend', () => {
@@ -64,8 +64,8 @@ export default function GoogleMapPicker({ latitude, longitude, onLocationSelect,
   }, [])
 
   const reverseGeocode = useCallback((lat: number, lng: number) => {
-    const geocoder = new google.maps.Geocoder()
-    geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+    const geocoder = new window.google.maps.Geocoder()
+    geocoder.geocode({ location: { lat, lng } }, (results: any, status: any) => {
       if (status === 'OK' && results?.[0]) {
         onLocationSelect({
           latitude: lat,
@@ -121,7 +121,7 @@ export default function GoogleMapPicker({ latitude, longitude, onLocationSelect,
   const initMap = () => {
     if (!mapRef.current || !window.google) return
 
-    const mapInstance = new google.maps.Map(mapRef.current, {
+    const mapInstance = new window.google.maps.Map(mapRef.current, {
       center: initialCenter,
       zoom: 15,
       mapTypeControl: false,
@@ -133,13 +133,13 @@ export default function GoogleMapPicker({ latitude, longitude, onLocationSelect,
 
     // Add initial marker if coordinates exist
     if (latitude && longitude) {
-      const pos = new google.maps.LatLng(latitude, longitude)
+      const pos = new window.google.maps.LatLng(latitude, longitude)
       const newMarker = updateMarker(pos, mapInstance, null)
       setMarker(newMarker)
     }
 
     // Click to place marker
-    mapInstance.addListener('click', (e: google.maps.MapMouseEvent) => {
+    mapInstance.addListener('click', (e: any) => {
       if (e.latLng) {
         const newMarker = updateMarker(e.latLng, mapInstance, marker)
         setMarker(newMarker)
@@ -149,7 +149,7 @@ export default function GoogleMapPicker({ latitude, longitude, onLocationSelect,
 
     // Setup autocomplete
     if (searchRef.current) {
-      const autocomplete = new google.maps.places.Autocomplete(searchRef.current, {
+      const autocomplete = new window.google.maps.places.Autocomplete(searchRef.current, {
         types: ['establishment', 'geocode'],
         componentRestrictions: { country: 'sa' }
       })
@@ -180,7 +180,7 @@ export default function GoogleMapPicker({ latitude, longitude, onLocationSelect,
   // Update marker when props change
   useEffect(() => {
     if (map && latitude && longitude) {
-      const pos = new google.maps.LatLng(latitude, longitude)
+      const pos = new window.google.maps.LatLng(latitude, longitude)
       map.setCenter(pos)
       const newMarker = updateMarker(pos, map, marker)
       setMarker(newMarker)
@@ -238,3 +238,4 @@ export default function GoogleMapPicker({ latitude, longitude, onLocationSelect,
     </div>
   )
 }
+
