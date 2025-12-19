@@ -5,11 +5,6 @@ import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import { AdminLayout, AdminCard } from '@/components/admin'
 
-// For static export
-export function generateStaticParams() {
-  return []
-}
-
 export default function EditManasik() {
   const [type, setType] = useState('STEP')
   const [title, setTitle] = useState('')
